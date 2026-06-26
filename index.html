@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Newman Academy | Conditioning Timer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        newman: {
+                            red: '#D32F2F',
+                            darkred: '#B71C1C',
+                            black: '#111111',
+                            dark: '#000000',
+                            white: '#FFFFFF',
+                            gray: '#333333'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bg-work { background-color: #B71C1C; }
+        .bg-rest { background-color: #111111; }
+        .bg-prep { background-color: #333333; }
+        
+        .timer-text {
+            font-variant-numeric: tabular-nums;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Hide scrollbar for clean app look */
+        ::-webkit-scrollbar { display: none; }
+        
+        /* Floating Tab */
+        #floating-tab {
+            transition: transform 0.3s ease-in-out;
+        }
+        .tab-hidden {
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+<body class="bg-rest min-h-screen flex flex-col font-sans" id="app-body">
+
+    <!-- Header -->
+    <header class="p-6 text-center shadow-md bg-newman-black bg-opacity-80 backdrop-blur-sm z-10 relative">
+        <h1 class="text-3xl font-black tracking-wider uppercase text-white">Newman <span class="text-newman-red">Academy</span></h1>
+        <p class="text-sm text-gray-400 font-semibold tracking-widest mt-1">Rugby Conditioning</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-2xl mx-auto z-10">
+        
+        <!-- Protocol Selector (Hidden when running) -->
+        <div id="setup-view" class="w-full space-y-8 animate-fade-in">
+            <div class="bg-newman-gray bg-opacity-50 p-2 rounded-2xl flex space-x-2">
+                <button id="btn-4x4" onclick="selectProtocol('4x4')" class="flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 bg-newman-red text-white shadow-lg">
+                    Norwegian 4x4
+                </button>
+                <button id="btn-rsa" onclick="selectProtocol('rsa')" class="flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 text-gray-400 hover:text-white">
+                    Female RSA
+                </button>
+            </div>
+
+            <div class="bg-newman-black p-6 rounded-2xl border border-gray-800 shadow-xl">
+                <h2 id="protocol-title" class="text-2xl font-bold mb-2">Norwegian 4x4</h2>
+                <p id="protocol-desc" class="text-gray-400 text-sm mb-6 h-12">4 mins high intensity work, 3 mins active recovery. Builds aerobic capacity.</p>
+                
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-newman-gray bg-opacity-30 p-3 rounded-lg">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Rounds</div>
+                        <div id="val-rounds" class="text-2xl font-bold">4</div>
+                    </div>
+                    <div class="bg-newman-gray bg-opacity-30 p-3 rounded-lg">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Work</div>
+                        <div id="val-work" class="text-2xl font-bold">4:00</div>
+                    </div>
+                    <div class="bg-newman-gray bg-opacity-30 p-3 rounded-lg">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Rest</div>
+                        <div id="val-rest" class="text-2xl font-bold">3:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startWorkout()" class="w-full py-5 bg-white text-newman-black font-black text-2xl uppercase tracking-widest rounded-2xl hover:bg-gray-200 active:scale-95 transition-transform shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                Start Session
+            </button>
+        </div>
+
+        <!-- Timer View (Hidden initially) -->
+        <div id="timer-view" class="w-full hidden flex-col items-center justify-center space-y-6">
+            <h2 id="phase-display" class="text-4xl md:text-5xl font-black uppercase tracking-widest text-newman-red drop-shadow-lg">Ready</h2>
+            
+            <div class="text-[6rem] md:text-[8rem] font-black leading-none timer-text tracking-tighter" id="time-display">
+                00:00
+            </div>
+
+            <div class="text-2xl font-bold text-gray-300">
+                Round <span id="round-display" class="text-white">1</span> / <span id="total-rounds-display">4</span>
+            </div>
+
+            <div class="flex space-x-4 w-full mt-8">
+                <button onclick="togglePause()" id="pause-btn" class="flex-1 py-4 border-2 border-white text-white font-bold text-xl uppercase rounded-xl active:bg-white active:text-black transition-colors">
+                    Pause
+                </button>
+                <button onclick="stopWorkout()" class="flex-1 py-4 bg-newman-gray text-white font-bold text-xl uppercase rounded-xl active:bg-gray-600 transition-colors">
+                    End
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Floating Loading Suggestion Tab -->
+    <button onclick="toggleSuggestions()" class="fixed right-0 top-1/3 bg-newman-red text-white py-4 px-2 rounded-l-xl shadow-lg z-40 font-bold tracking-wider flex flex-col items-center space-y-2 border-y border-l border-red-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+        <span class="[writing-mode:vertical-rl] transform rotate-180 hidden md:block">Loading Guide</span>
+    </button>
+
+    <!-- Suggestions Modal/Drawer -->
+    <div id="floating-tab" class="fixed right-0 top-0 h-full w-80 max-w-[85vw] bg-newman-black border-l border-gray-800 shadow-2xl z-50 tab-hidden flex flex-col">
+        <div class="p-6 bg-newman-darkred flex justify-between items-center">
+            <h3 class="text-xl font-bold text-white">Loading Guide</h3>
+            <button onclick="toggleSuggestions()" class="text-white hover:text-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-6 overflow-y-auto flex-1">
+            <div class="bg-newman-gray bg-opacity-40 p-4 rounded-xl border border-gray-700">
+                <h4 class="text-newman-red font-bold uppercase tracking-wider mb-2">June & July</h4>
+                <p class="text-sm text-gray-300"><span class="text-white font-bold">1x</span> Norwegian 4x4</p>
+                <p class="text-sm text-gray-300"><span class="text-white font-bold">1x</span> Female RSA</p>
+                <p class="text-xs text-gray-500 mt-2">Build aerobic base while introducing alactic power without overtaxing the CNS.</p>
+            </div>
+            
+            <div class="bg-newman-gray bg-opacity-40 p-4 rounded-xl border border-gray-700">
+                <h4 class="text-newman-red font-bold uppercase tracking-wider mb-2">August (Pre-Season)</h4>
+                <p class="text-sm text-gray-300"><span class="text-white font-bold">2x</span> Female RSA</p>
+                <p class="text-xs text-gray-500 mt-2">Shift to highly specific repeat sprint ability to prep for match demands. Stop reps if mechanics degrade.</p>
+            </div>
+
+            <div class="bg-newman-gray bg-opacity-40 p-4 rounded-xl border border-red-900 border-dashed">
+                <h4 class="text-white font-bold uppercase tracking-wider mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                    Modifications
+                </h4>
+                <p class="text-sm text-gray-300">If injured, ankles are sore, or athlete reports low readiness:</p>
+                <p class="text-sm text-white font-bold mt-1">Switch to 4x4 (Bike/Row)</p>
+                <p class="text-xs text-gray-500 mt-1">Remove eccentric impact forces while maintaining cardiovascular stimulus.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Overlay for closing modal -->
+    <div id="modal-overlay" onclick="toggleSuggestions()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden backdrop-blur-sm transition-opacity"></div>
+
+    <script>
+        // --- Protocols Data ---
+        const protocols = {
+            '4x4': {
+                id: '4x4',
+                title: 'Norwegian 4x4',
+                desc: '4 mins high intensity (85-95% HRmax), 3 mins active recovery. Builds aerobic capacity.',
+                rounds: 4,
+                workTime: 240, // 4 mins
+                restTime: 180  // 3 mins
+            },
+            'rsa': {
+                id: 'rsa',
+                title: 'Female RSA Protocol',
+                desc: '8 sec max velocity sprint, 52 sec complete active recovery. Protects CNS, builds alactic power.',
+                rounds: 8,
+                workTime: 8,   // 8 secs
+                restTime: 52   // 52 secs
+            }
+        };
+
+        // --- State ---
+        let currentProtocol = protocols['4x4'];
+        let isRunning = false;
+        let isPaused = false;
+        let timerInterval = null;
+        
+        let currentPhase = 'prep'; // 'prep', 'work', 'rest'
+        let timeRemaining = 10; // 10 sec prep time
+        let currentRound = 1;
+        
+        let wakeLock = null;
+        let audioCtx = null;
+
+        // --- UI Elements ---
+        const bodyEl = document.getElementById('app-body');
+        const setupView = document.getElementById('setup-view');
+        const timerView = document.getElementById('timer-view');
+        const timeDisplay = document.getElementById('time-display');
+        const phaseDisplay = document.getElementById('phase-display');
+        const roundDisplay = document.getElementById('round-display');
+        const totalRoundsDisplay = document.getElementById('total-rounds-display');
+        const pauseBtn = document.getElementById('pause-btn');
+
+        // --- Initialization & UI Toggles ---
+        function selectProtocol(id) {
+            currentProtocol = protocols[id];
+            
+            // Update Buttons
+            document.getElementById('btn-4x4').className = id === '4x4' 
+                ? 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 bg-newman-red text-white shadow-lg'
+                : 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 text-gray-400 hover:text-white';
+            document.getElementById('btn-rsa').className = id === 'rsa' 
+                ? 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 bg-newman-red text-white shadow-lg'
+                : 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 text-gray-400 hover:text-white';
+
+            // Update Info
+            document.getElementById('protocol-title').innerText = currentProtocol.title;
+            document.getElementById('protocol-desc').innerText = currentProtocol.desc;
+            document.getElementById('val-rounds').innerText = currentProtocol.rounds;
+            document.getElementById('val-work').innerText = formatTime(currentProtocol.workTime);
+            document.getElementById('val-rest').innerText = formatTime(currentProtocol.restTime);
+        }
+
+        function toggleSuggestions() {
+            const tab = document.getElementById('floating-tab');
+            const overlay = document.getElementById('modal-overlay');
+            if (tab.classList.contains('tab-hidden')) {
+                tab.classList.remove('tab-hidden');
+                overlay.classList.remove('hidden');
+            } else {
+                tab.classList.add('tab-hidden');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timeDisplay.innerText = formatTime(timeRemaining);
+            roundDisplay.innerText = currentRound;
+            totalRoundsDisplay.innerText = currentProtocol.rounds;
+            
+            if (currentPhase === 'prep') {
+                phaseDisplay.innerText = "Get Ready";
+                phaseDisplay.className = "text-4xl md:text-5xl font-black uppercase tracking-widest text-white drop-shadow-lg";
+                bodyEl.className = "bg-prep min-h-screen flex flex-col font-sans";
+            } else if (currentPhase === 'work') {
+                phaseDisplay.innerText = currentProtocol.id === 'rsa' ? "Sprint!" : "Work";
+                phaseDisplay.className = "text-4xl md:text-5xl font-black uppercase tracking-widest text-white drop-shadow-lg";
+                bodyEl.className = "bg-work min-h-screen flex flex-col font-sans";
+            } else {
+                phaseDisplay.innerText = "Recover";
+                phaseDisplay.className = "text-4xl md:text-5xl font-black uppercase tracking-widest text-gray-400 drop-shadow-lg";
+                bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans";
+            }
+        }
+
+        // --- Audio & Speech ---
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            // Silent utter to unlock speech synth on iOS
+            if ('speechSynthesis' in window) {
+                let msg = new SpeechSynthesisUtterance('');
+                msg.volume = 0;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        function beep(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'short') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'long') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+            }
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech to ensure immediate feedback
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.rate = 1.1; // Slightly faster
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        // --- Wake Lock ---
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Screen Wake Lock released');
+                    });
+                } catch (err) {
+                    // Silently ignore NotAllowedError as it occurs frequently in restricted iframes
+                    if (err.name !== 'NotAllowedError') {
+                        console.log(`Wake Lock: ${err.name}, ${err.message}`);
+                    }
+                }
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release()
+                    .then(() => { wakeLock = null; });
+            }
+        }
+
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible' && isRunning) {
+                await requestWakeLock();
+            }
+        });
+
+        // --- Timer Logic ---
+        function startWorkout() {
+            initAudio();
+            requestWakeLock();
+            
+            isRunning = true;
+            isPaused = false;
+            currentPhase = 'prep';
+            timeRemaining = 10;
+            currentRound = 1;
+            
+            setupView.classList.add('hidden');
+            timerView.classList.remove('hidden');
+            timerView.classList.add('flex');
+            
+            updateDisplay();
+            speak("Get ready. 10 seconds.");
+            
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        function stopWorkout() {
+            clearInterval(timerInterval);
+            releaseWakeLock();
+            isRunning = false;
+            
+            timerView.classList.add('hidden');
+            timerView.classList.remove('flex');
+            setupView.classList.remove('hidden');
+            
+            bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans";
+            pauseBtn.innerText = "Pause";
+            pauseBtn.className = "flex-1 py-4 border-2 border-white text-white font-bold text-xl uppercase rounded-xl active:bg-white active:text-black transition-colors";
+            window.speechSynthesis.cancel();
+        }
+
+        function togglePause() {
+            if (!isRunning) return;
+            
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseBtn.innerText = "Resume";
+                pauseBtn.className = "flex-1 py-4 bg-white text-black font-bold text-xl uppercase rounded-xl transition-colors";
+                speak("Paused");
+            } else {
+                pauseBtn.innerText = "Pause";
+                pauseBtn.className = "flex-1 py-4 border-2 border-white text-white font-bold text-xl uppercase rounded-xl active:bg-white active:text-black transition-colors";
+                // Don't speak resume, just let timer handle audio cues
+            }
+        }
+
+        function tick() {
+            if (isPaused) return;
+
+            timeRemaining--;
+
+            // Audio Cues
+            if (timeRemaining === 3) { speak("Three"); beep('short'); }
+            if (timeRemaining === 2) { speak("Two"); beep('short'); }
+            if (timeRemaining === 1) { speak("One"); beep('short'); }
+            
+            // Halfway cues for longer protocols
+            if (currentPhase === 'work' && currentProtocol.id === '4x4' && timeRemaining === 120) {
+                speak("Two minutes down, two to go.");
+            }
+            if (currentPhase === 'rest' && currentProtocol.id === '4x4' && timeRemaining === 60) {
+                speak("One minute of recovery left.");
+            }
+            // Cues for RSA
+            if (currentPhase === 'rest' && currentProtocol.id === 'rsa' && timeRemaining === 10) {
+                speak("Ten seconds.");
+            }
+
+            // Phase Transitions
+            if (timeRemaining < 0) {
+                beep('long');
+                
+                if (currentPhase === 'prep') {
+                    currentPhase = 'work';
+                    timeRemaining = currentProtocol.workTime;
+                    speak(currentProtocol.id === 'rsa' ? "Sprint!" : "Work");
+                } 
+                else if (currentPhase === 'work') {
+                    currentPhase = 'rest';
+                    timeRemaining = currentProtocol.restTime;
+                    speak("Rest and recover.");
+                } 
+                else if (currentPhase === 'rest') {
+                    if (currentRound >= currentProtocol.rounds) {
+                        // Workout Complete
+                        clearInterval(timerInterval);
+                        speak("Workout complete. Well done.");
+                        phaseDisplay.innerText = "Done";
+                        timeDisplay.innerText = "00:00";
+                        bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans";
+                        setTimeout(stopWorkout, 4000);
+                        return;
+                    } else {
+                        currentRound++;
+                        currentPhase = 'work';
+                        timeRemaining = currentProtocol.workTime;
+                        speak(currentProtocol.id === 'rsa' ? "Sprint!" : "Work");
+                    }
+                }
+            }
+
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
