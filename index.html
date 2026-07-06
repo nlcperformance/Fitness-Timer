@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Newman Academy | Conditioning Timer</title>
+    <!-- Google Fonts for Professional Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,15 +16,20 @@
                     colors: {
                         newman: {
                             red: '#D32F2F',
-                            darkred: '#B71C1C',
-                            black: '#111111',
+                            darkred: '#8B0000', /* Deepened for richer gradients */
+                            black: '#0a0a0a',
                             dark: '#000000',
                             white: '#FFFFFF',
-                            gray: '#333333'
+                            gray: '#222222'
                         }
                     },
                     fontFamily: {
-                        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'neon-red': '0 0 20px rgba(211, 47, 47, 0.5)',
+                        'neon-white': '0 0 20px rgba(255, 255, 255, 0.2)',
                     }
                 }
             }
@@ -31,16 +40,28 @@
             background-color: #000000;
             color: #FFFFFF;
             overflow-x: hidden;
-            transition: background-color 0.5s ease;
+            transition: background-image 0.8s ease, background-color 0.8s ease;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
-        .bg-work { background-color: #B71C1C; }
-        .bg-rest { background-color: #111111; }
-        .bg-prep { background-color: #333333; }
+        
+        /* Modern Gradient Backgrounds */
+        .bg-work { background: radial-gradient(circle at center, #D32F2F 0%, #8B0000 100%); }
+        .bg-rest { background: radial-gradient(circle at center, #222222 0%, #000000 100%); }
+        .bg-prep { background: radial-gradient(circle at center, #333333 0%, #111111 100%); }
+        .bg-set-rest { background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); }
         
         .timer-text {
             font-variant-numeric: tabular-nums;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Hide scrollbar for clean app look */
@@ -48,78 +69,102 @@
         
         /* Floating Tab */
         #floating-tab {
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .tab-hidden {
             transform: translateX(100%);
         }
     </style>
 </head>
-<body class="bg-rest min-h-screen flex flex-col font-sans" id="app-body">
+<body class="bg-rest min-h-screen flex flex-col font-sans antialiased selection:bg-newman-red" id="app-body">
 
     <!-- Header -->
-    <header class="p-6 text-center shadow-md bg-newman-black bg-opacity-80 backdrop-blur-sm z-10 relative">
-        <h1 class="text-3xl font-black tracking-wider uppercase text-white">Newman <span class="text-newman-red">Academy</span></h1>
-        <p class="text-sm text-gray-400 font-semibold tracking-widest mt-1">Rugby Conditioning</p>
+    <header class="p-6 text-center z-10 relative">
+        <h1 class="text-3xl md:text-4xl font-black tracking-tighter uppercase text-white drop-shadow-md">
+            Newman <span class="text-newman-red">Academy</span>
+        </h1>
+        <p class="text-xs md:text-sm text-gray-400 font-semibold tracking-[0.2em] mt-2 uppercase">Elite Rugby Conditioning</p>
     </header>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col items-center justify-center p-4 w-full max-w-2xl mx-auto z-10">
         
         <!-- Protocol Selector (Hidden when running) -->
-        <div id="setup-view" class="w-full space-y-8 animate-fade-in">
-            <div class="bg-newman-gray bg-opacity-50 p-2 rounded-2xl flex space-x-2">
-                <button id="btn-4x4" onclick="selectProtocol('4x4')" class="flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 bg-newman-red text-white shadow-lg">
+        <div id="setup-view" class="w-full space-y-6 animate-fade-in transition-all duration-500">
+            
+            <!-- Segmented Control -->
+            <div class="glass-panel p-1.5 rounded-2xl flex space-x-1 shadow-lg">
+                <button id="btn-4x4" onclick="selectProtocol('4x4')" class="flex-1 py-3.5 px-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 bg-newman-red text-white shadow-neon-red">
                     Norwegian 4x4
                 </button>
-                <button id="btn-rsa" onclick="selectProtocol('rsa')" class="flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 text-gray-400 hover:text-white">
-                    Female RSA
+                <button id="btn-rsa" onclick="selectProtocol('rsa')" class="flex-1 py-3.5 px-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                    Female RSA v2
                 </button>
             </div>
 
-            <div class="bg-newman-black p-6 rounded-2xl border border-gray-800 shadow-xl">
-                <h2 id="protocol-title" class="text-2xl font-bold mb-2">Norwegian 4x4</h2>
-                <p id="protocol-desc" class="text-gray-400 text-sm mb-6 h-12">4 mins high intensity work, 3 mins active recovery. Builds aerobic capacity.</p>
+            <!-- Details Card -->
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                <!-- Subtle glow effect inside card -->
+                <div class="absolute -top-20 -right-20 w-40 h-40 bg-newman-red rounded-full mix-blend-screen filter blur-[70px] opacity-30"></div>
                 
-                <div class="grid grid-cols-3 gap-4 text-center">
-                    <div class="bg-newman-gray bg-opacity-30 p-3 rounded-lg">
-                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Rounds</div>
-                        <div id="val-rounds" class="text-2xl font-bold">4</div>
+                <h2 id="protocol-title" class="text-3xl font-black mb-2 tracking-tight">Norwegian 4x4</h2>
+                <p id="protocol-desc" class="text-gray-400 text-sm md:text-base mb-8 h-16 leading-relaxed">4 mins high intensity work, 3 mins active recovery. Builds aerobic capacity.</p>
+                
+                <div class="grid grid-cols-3 gap-3 md:gap-4 text-center">
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5">
+                        <div class="text-[10px] sm:text-xs text-newman-red font-bold uppercase tracking-widest mb-1" id="label-rounds">Rounds</div>
+                        <div id="val-rounds" class="text-xl sm:text-3xl font-black font-mono">4</div>
                     </div>
-                    <div class="bg-newman-gray bg-opacity-30 p-3 rounded-lg">
-                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Work</div>
-                        <div id="val-work" class="text-2xl font-bold">4:00</div>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5">
+                        <div class="text-[10px] sm:text-xs text-newman-red font-bold uppercase tracking-widest mb-1">Work</div>
+                        <div id="val-work" class="text-xl sm:text-3xl font-black font-mono">4:00</div>
                     </div>
-                    <div class="bg-newman-gray bg-opacity-30 p-3 rounded-lg">
-                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Rest</div>
-                        <div id="val-rest" class="text-2xl font-bold">3:00</div>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5">
+                        <div class="text-[10px] sm:text-xs text-newman-red font-bold uppercase tracking-widest mb-1">Rest</div>
+                        <div id="val-rest" class="text-xl sm:text-3xl font-black font-mono">3:00</div>
                     </div>
                 </div>
             </div>
 
-            <button onclick="startWorkout()" class="w-full py-5 bg-white text-newman-black font-black text-2xl uppercase tracking-widest rounded-2xl hover:bg-gray-200 active:scale-95 transition-transform shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                Start Session
+            <button onclick="startWorkout()" class="w-full py-5 bg-gradient-to-r from-white to-gray-200 text-newman-black font-black text-xl md:text-2xl uppercase tracking-[0.15em] rounded-2xl hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-neon-white">
+                Initiate Session
             </button>
         </div>
 
         <!-- Timer View (Hidden initially) -->
-        <div id="timer-view" class="w-full hidden flex-col items-center justify-center space-y-6">
-            <h2 id="phase-display" class="text-4xl md:text-5xl font-black uppercase tracking-widest text-newman-red drop-shadow-lg">Ready</h2>
+        <div id="timer-view" class="w-full hidden flex-col items-center justify-center space-y-2 opacity-0 transition-opacity duration-500">
             
-            <div class="text-[6rem] md:text-[8rem] font-black leading-none timer-text tracking-tighter" id="time-display">
-                00:00
+            <div id="drill-name" class="text-sm md:text-base font-bold text-gray-300 uppercase tracking-widest text-center px-4 min-h-[2rem] mb-2"></div>
+            <h2 id="phase-display" class="text-5xl md:text-6xl font-black uppercase tracking-tighter text-newman-red drop-shadow-xl">Ready</h2>
+            
+            <div class="relative w-full flex flex-col items-center py-6">
+                <div class="text-[5.5rem] sm:text-[8rem] md:text-[10rem] font-black leading-none timer-text tracking-tighter font-mono" id="time-display">
+                    00:00
+                </div>
+                
+                <!-- Animated Progress Bar -->
+                <div class="w-3/4 max-w-md h-1.5 bg-black/50 rounded-full mt-6 overflow-hidden border border-white/10">
+                    <div id="progress-bar" class="h-full bg-white transition-all duration-1000 ease-linear w-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+                </div>
             </div>
 
-            <div class="text-2xl font-bold text-gray-300">
-                Round <span id="round-display" class="text-white">1</span> / <span id="total-rounds-display">4</span>
+            <div class="glass-panel px-8 py-4 rounded-full flex space-x-8 mt-4 border border-white/10">
+                <div id="set-tracker" class="hidden flex-col items-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Set</span>
+                    <div class="text-xl font-bold font-mono"><span id="set-display" class="text-white">1</span><span class="text-gray-600">/</span><span id="total-sets-display" class="text-gray-400">4</span></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Rep</span>
+                    <div class="text-xl font-bold font-mono"><span id="round-display" class="text-white">1</span><span class="text-gray-600">/</span><span id="total-rounds-display" class="text-gray-400">4</span></div>
+                </div>
             </div>
 
-            <div class="flex space-x-4 w-full mt-8">
-                <button onclick="togglePause()" id="pause-btn" class="flex-1 py-4 border-2 border-white text-white font-bold text-xl uppercase rounded-xl active:bg-white active:text-black transition-colors">
+            <div class="flex space-x-4 w-full mt-10">
+                <button onclick="togglePause()" id="pause-btn" class="flex-1 py-4 glass-panel text-white font-bold text-lg tracking-widest uppercase rounded-2xl active:bg-white/20 transition-all">
                     Pause
                 </button>
-                <button onclick="stopWorkout()" class="flex-1 py-4 bg-newman-gray text-white font-bold text-xl uppercase rounded-xl active:bg-gray-600 transition-colors">
-                    End
+                <button onclick="stopWorkout()" class="flex-1 py-4 bg-newman-red/20 border border-newman-red/50 text-newman-red hover:bg-newman-red hover:text-white font-bold text-lg tracking-widest uppercase rounded-2xl transition-all">
+                    Abort
                 </button>
             </div>
         </div>
@@ -127,47 +172,47 @@
     </main>
 
     <!-- Floating Loading Suggestion Tab -->
-    <button onclick="toggleSuggestions()" class="fixed right-0 top-1/3 bg-newman-red text-white py-4 px-2 rounded-l-xl shadow-lg z-40 font-bold tracking-wider flex flex-col items-center space-y-2 border-y border-l border-red-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-        <span class="[writing-mode:vertical-rl] transform rotate-180 hidden md:block">Loading Guide</span>
+    <button onclick="toggleSuggestions()" class="fixed right-0 top-1/3 glass-panel !bg-newman-red/90 text-white py-5 px-2.5 rounded-l-2xl shadow-neon-red z-40 font-bold tracking-widest flex flex-col items-center space-y-3 border-y border-l border-red-400/50 hover:scale-105 origin-right transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+        <span class="[writing-mode:vertical-rl] transform rotate-180 hidden md:block text-sm uppercase">Loading Guide</span>
     </button>
 
     <!-- Suggestions Modal/Drawer -->
-    <div id="floating-tab" class="fixed right-0 top-0 h-full w-80 max-w-[85vw] bg-newman-black border-l border-gray-800 shadow-2xl z-50 tab-hidden flex flex-col">
-        <div class="p-6 bg-newman-darkred flex justify-between items-center">
-            <h3 class="text-xl font-bold text-white">Loading Guide</h3>
-            <button onclick="toggleSuggestions()" class="text-white hover:text-gray-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <div id="floating-tab" class="fixed right-0 top-0 h-full w-80 max-w-[85vw] glass-panel !bg-black/95 !backdrop-blur-2xl border-l border-white/10 shadow-2xl z-50 tab-hidden flex flex-col">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center bg-gradient-to-r from-newman-darkred to-newman-red">
+            <h3 class="text-lg font-black tracking-widest uppercase text-white drop-shadow-md">Loading Guide</h3>
+            <button onclick="toggleSuggestions()" class="text-white/80 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
         </div>
-        <div class="p-6 space-y-6 overflow-y-auto flex-1">
-            <div class="bg-newman-gray bg-opacity-40 p-4 rounded-xl border border-gray-700">
-                <h4 class="text-newman-red font-bold uppercase tracking-wider mb-2">June & July</h4>
-                <p class="text-sm text-gray-300"><span class="text-white font-bold">1x</span> Norwegian 4x4</p>
-                <p class="text-sm text-gray-300"><span class="text-white font-bold">1x</span> Female RSA</p>
-                <p class="text-xs text-gray-500 mt-2">Build aerobic base while introducing alactic power without overtaxing the CNS.</p>
+        <div class="p-6 space-y-5 overflow-y-auto flex-1">
+            <div class="bg-white/5 p-5 rounded-2xl border border-white/5 shadow-inner">
+                <h4 class="text-newman-red font-black uppercase tracking-widest text-xs mb-3">June & July</h4>
+                <p class="text-sm text-gray-300 mb-1"><span class="text-white font-black text-base mr-1">1x</span> Norwegian 4x4</p>
+                <p class="text-sm text-gray-300"><span class="text-white font-black text-base mr-1">1x</span> Female RSA v2</p>
+                <p class="text-[11px] text-gray-500 mt-3 leading-relaxed">Build aerobic base while introducing alactic power without overtaxing the CNS.</p>
             </div>
             
-            <div class="bg-newman-gray bg-opacity-40 p-4 rounded-xl border border-gray-700">
-                <h4 class="text-newman-red font-bold uppercase tracking-wider mb-2">August (Pre-Season)</h4>
-                <p class="text-sm text-gray-300"><span class="text-white font-bold">2x</span> Female RSA</p>
-                <p class="text-xs text-gray-500 mt-2">Shift to highly specific repeat sprint ability to prep for match demands. Stop reps if mechanics degrade.</p>
+            <div class="bg-white/5 p-5 rounded-2xl border border-white/5 shadow-inner">
+                <h4 class="text-newman-red font-black uppercase tracking-widest text-xs mb-3">August (Pre-Season)</h4>
+                <p class="text-sm text-gray-300"><span class="text-white font-black text-base mr-1">2x</span> Female RSA v2</p>
+                <p class="text-[11px] text-gray-500 mt-3 leading-relaxed">Shift to highly specific repeat sprint ability to prep for match demands. Stop reps if mechanics degrade.</p>
             </div>
 
-            <div class="bg-newman-gray bg-opacity-40 p-4 rounded-xl border border-red-900 border-dashed">
-                <h4 class="text-white font-bold uppercase tracking-wider mb-2 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+            <div class="bg-newman-red/10 p-5 rounded-2xl border border-newman-red/30">
+                <h4 class="text-white font-black uppercase tracking-widest text-xs mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-newman-red" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                     Modifications
                 </h4>
-                <p class="text-sm text-gray-300">If injured, ankles are sore, or athlete reports low readiness:</p>
-                <p class="text-sm text-white font-bold mt-1">Switch to 4x4 (Bike/Row)</p>
-                <p class="text-xs text-gray-500 mt-1">Remove eccentric impact forces while maintaining cardiovascular stimulus.</p>
+                <p class="text-[13px] text-gray-300 leading-tight mb-2">If injured, ankles are sore, or athlete reports low readiness:</p>
+                <p class="text-sm text-white font-bold mb-2 pb-2 border-b border-white/10">Switch to 4x4 (Bike/Row)</p>
+                <p class="text-[11px] text-gray-400 leading-relaxed">Remove eccentric impact forces while maintaining cardiovascular stimulus.</p>
             </div>
         </div>
     </div>
     
     <!-- Overlay for closing modal -->
-    <div id="modal-overlay" onclick="toggleSuggestions()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden backdrop-blur-sm transition-opacity"></div>
+    <div id="modal-overlay" onclick="toggleSuggestions()" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity duration-300"></div>
 
     <script>
         // --- Protocols Data ---
@@ -176,17 +221,29 @@
                 id: '4x4',
                 title: 'Norwegian 4x4',
                 desc: '4 mins high intensity (85-95% HRmax), 3 mins active recovery. Builds aerobic capacity.',
-                rounds: 4,
+                sets: 1,
+                reps: 4,
                 workTime: 240, // 4 mins
-                restTime: 180  // 3 mins
+                restTime: 180, // 3 mins
+                setRestTime: 0,
+                getPhaseName: (set) => "Aerobic Capacity Builder"
             },
             'rsa': {
                 id: 'rsa',
-                title: 'Female RSA Protocol',
-                desc: '8 sec max velocity sprint, 52 sec complete active recovery. Protects CNS, builds alactic power.',
-                rounds: 8,
-                workTime: 8,   // 8 secs
-                restTime: 52   // 52 secs
+                title: 'Girls RSA Protocol v2',
+                desc: '4 Sets of 6 reps (35m). 52s active recovery. Set 1: Linear, Set 2: Down-Ups, Set 3: Multi-Dir, Set 4: Optional.',
+                sets: 4,
+                reps: 6,
+                workTime: 8,   // ~8s to simulate 35m max effort
+                restTime: 52,  // 52 secs active walk
+                setRestTime: 180, // 3 minutes between sets
+                getPhaseName: (set) => {
+                    if (set === 1) return "Pure Linear Speed";
+                    if (set === 2) return "Level Change: Down-Ups into Sprint";
+                    if (set === 3) return "Multi-Directional Game Speed";
+                    if (set === 4) return "Optional Finisher (Linear)";
+                    return "Max Effort Sprint";
+                }
             }
         };
 
@@ -196,8 +253,10 @@
         let isPaused = false;
         let timerInterval = null;
         
-        let currentPhase = 'prep'; // 'prep', 'work', 'rest'
+        let currentPhase = 'prep'; // 'prep', 'work', 'rest', 'setRest'
         let timeRemaining = 10; // 10 sec prep time
+        let phaseTotalTime = 10; 
+        let currentSet = 1;
         let currentRound = 1;
         
         let wakeLock = null;
@@ -209,26 +268,38 @@
         const timerView = document.getElementById('timer-view');
         const timeDisplay = document.getElementById('time-display');
         const phaseDisplay = document.getElementById('phase-display');
+        const drillNameDisplay = document.getElementById('drill-name');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const setTracker = document.getElementById('set-tracker');
+        const setDisplay = document.getElementById('set-display');
+        const totalSetsDisplay = document.getElementById('total-sets-display');
         const roundDisplay = document.getElementById('round-display');
         const totalRoundsDisplay = document.getElementById('total-rounds-display');
+        
         const pauseBtn = document.getElementById('pause-btn');
 
         // --- Initialization & UI Toggles ---
         function selectProtocol(id) {
             currentProtocol = protocols[id];
             
-            // Update Buttons
+            // Update Segmented Control Buttons
             document.getElementById('btn-4x4').className = id === '4x4' 
-                ? 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 bg-newman-red text-white shadow-lg'
-                : 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 text-gray-400 hover:text-white';
+                ? 'flex-1 py-3.5 px-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 bg-newman-red text-white shadow-neon-red'
+                : 'flex-1 py-3.5 px-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5';
             document.getElementById('btn-rsa').className = id === 'rsa' 
-                ? 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 bg-newman-red text-white shadow-lg'
-                : 'flex-1 py-4 px-4 rounded-xl font-bold text-lg transition-all duration-300 text-gray-400 hover:text-white';
+                ? 'flex-1 py-3.5 px-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 bg-newman-red text-white shadow-neon-red'
+                : 'flex-1 py-3.5 px-4 rounded-xl font-bold text-sm md:text-base transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5';
 
             // Update Info
             document.getElementById('protocol-title').innerText = currentProtocol.title;
             document.getElementById('protocol-desc').innerText = currentProtocol.desc;
-            document.getElementById('val-rounds').innerText = currentProtocol.rounds;
+            
+            document.getElementById('label-rounds').innerText = currentProtocol.sets > 1 ? "Sets x Reps" : "Rounds";
+            document.getElementById('val-rounds').innerText = currentProtocol.sets > 1 
+                ? `${currentProtocol.sets}x${currentProtocol.reps}` 
+                : currentProtocol.reps;
+            
             document.getElementById('val-work').innerText = formatTime(currentProtocol.workTime);
             document.getElementById('val-rest').innerText = formatTime(currentProtocol.restTime);
         }
@@ -253,21 +324,47 @@
 
         function updateDisplay() {
             timeDisplay.innerText = formatTime(timeRemaining);
-            roundDisplay.innerText = currentRound;
-            totalRoundsDisplay.innerText = currentProtocol.rounds;
             
+            // Progress Bar Logic
+            let percentage = (timeRemaining / phaseTotalTime) * 100;
+            progressBar.style.width = `${percentage}%`;
+
+            // Update Sets and Reps
+            if (currentProtocol.sets > 1) {
+                setTracker.classList.remove('hidden');
+                setTracker.classList.add('flex');
+                setDisplay.innerText = currentSet;
+                totalSetsDisplay.innerText = currentProtocol.sets;
+                drillNameDisplay.innerText = currentProtocol.getPhaseName(currentSet);
+            } else {
+                setTracker.classList.add('hidden');
+                setTracker.classList.remove('flex');
+                drillNameDisplay.innerText = currentProtocol.title;
+            }
+            roundDisplay.innerText = currentRound;
+            totalRoundsDisplay.innerText = currentProtocol.reps;
+            
+            // Update Phase UI
             if (currentPhase === 'prep') {
                 phaseDisplay.innerText = "Get Ready";
-                phaseDisplay.className = "text-4xl md:text-5xl font-black uppercase tracking-widest text-white drop-shadow-lg";
-                bodyEl.className = "bg-prep min-h-screen flex flex-col font-sans";
+                phaseDisplay.className = "text-5xl md:text-6xl font-black uppercase tracking-tighter text-white drop-shadow-xl";
+                progressBar.className = "h-full bg-white transition-all duration-1000 ease-linear shadow-neon-white";
+                bodyEl.className = "bg-prep min-h-screen flex flex-col font-sans antialiased selection:bg-newman-red";
             } else if (currentPhase === 'work') {
                 phaseDisplay.innerText = currentProtocol.id === 'rsa' ? "Sprint!" : "Work";
-                phaseDisplay.className = "text-4xl md:text-5xl font-black uppercase tracking-widest text-white drop-shadow-lg";
-                bodyEl.className = "bg-work min-h-screen flex flex-col font-sans";
-            } else {
+                phaseDisplay.className = "text-5xl md:text-6xl font-black uppercase tracking-tighter text-white drop-shadow-xl";
+                progressBar.className = "h-full bg-white transition-all duration-1000 ease-linear shadow-neon-white";
+                bodyEl.className = "bg-work min-h-screen flex flex-col font-sans antialiased selection:bg-newman-red";
+            } else if (currentPhase === 'rest') {
                 phaseDisplay.innerText = "Recover";
-                phaseDisplay.className = "text-4xl md:text-5xl font-black uppercase tracking-widest text-gray-400 drop-shadow-lg";
-                bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans";
+                phaseDisplay.className = "text-5xl md:text-6xl font-black uppercase tracking-tighter text-gray-500 drop-shadow-xl";
+                progressBar.className = "h-full bg-newman-red transition-all duration-1000 ease-linear shadow-neon-red";
+                bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans antialiased selection:bg-newman-red";
+            } else if (currentPhase === 'setRest') {
+                phaseDisplay.innerText = "Set Rest";
+                phaseDisplay.className = "text-5xl md:text-6xl font-black uppercase tracking-tighter text-newman-red drop-shadow-xl";
+                progressBar.className = "h-full bg-newman-red transition-all duration-1000 ease-linear shadow-neon-red";
+                bodyEl.className = "bg-set-rest min-h-screen flex flex-col font-sans antialiased selection:bg-newman-red";
             }
         }
 
@@ -279,7 +376,6 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            // Silent utter to unlock speech synth on iOS
             if ('speechSynthesis' in window) {
                 let msg = new SpeechSynthesisUtterance('');
                 msg.volume = 0;
@@ -314,10 +410,9 @@
 
         function speak(text) {
             if ('speechSynthesis' in window) {
-                // Cancel any ongoing speech to ensure immediate feedback
                 window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(text);
-                msg.rate = 1.1; // Slightly faster
+                msg.rate = 1.05; // Slightly faster, but clear
                 window.speechSynthesis.speak(msg);
             }
         }
@@ -331,7 +426,6 @@
                         console.log('Screen Wake Lock released');
                     });
                 } catch (err) {
-                    // Silently ignore NotAllowedError as it occurs frequently in restricted iframes
                     if (err.name !== 'NotAllowedError') {
                         console.log(`Wake Lock: ${err.name}, ${err.message}`);
                     }
@@ -361,14 +455,26 @@
             isPaused = false;
             currentPhase = 'prep';
             timeRemaining = 10;
+            phaseTotalTime = 10;
+            currentSet = 1;
             currentRound = 1;
             
-            setupView.classList.add('hidden');
-            timerView.classList.remove('hidden');
-            timerView.classList.add('flex');
+            setupView.classList.add('hidden', 'opacity-0');
+            
+            setTimeout(() => {
+                timerView.classList.remove('hidden');
+                timerView.classList.add('flex');
+                // Small delay to allow display flex to apply before transitioning opacity
+                setTimeout(() => timerView.classList.remove('opacity-0'), 50);
+            }, 300);
             
             updateDisplay();
-            speak("Get ready. 10 seconds.");
+            
+            let introText = "Get ready. 10 seconds.";
+            if (currentProtocol.sets > 1) {
+                introText = `Get ready for Set 1. ${currentProtocol.getPhaseName(1)}. 10 seconds.`;
+            }
+            speak(introText);
             
             timerInterval = setInterval(tick, 1000);
         }
@@ -378,13 +484,17 @@
             releaseWakeLock();
             isRunning = false;
             
-            timerView.classList.add('hidden');
-            timerView.classList.remove('flex');
-            setupView.classList.remove('hidden');
+            timerView.classList.add('opacity-0');
+            setTimeout(() => {
+                timerView.classList.add('hidden');
+                timerView.classList.remove('flex');
+                setupView.classList.remove('hidden');
+                setTimeout(() => setupView.classList.remove('opacity-0'), 50);
+            }, 500);
             
-            bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans";
+            bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans antialiased selection:bg-newman-red";
             pauseBtn.innerText = "Pause";
-            pauseBtn.className = "flex-1 py-4 border-2 border-white text-white font-bold text-xl uppercase rounded-xl active:bg-white active:text-black transition-colors";
+            pauseBtn.className = "flex-1 py-4 glass-panel text-white font-bold text-lg tracking-widest uppercase rounded-2xl active:bg-white/20 transition-all";
             window.speechSynthesis.cancel();
         }
 
@@ -394,18 +504,16 @@
             isPaused = !isPaused;
             if (isPaused) {
                 pauseBtn.innerText = "Resume";
-                pauseBtn.className = "flex-1 py-4 bg-white text-black font-bold text-xl uppercase rounded-xl transition-colors";
+                pauseBtn.className = "flex-1 py-4 bg-white text-black font-bold text-lg tracking-widest uppercase rounded-2xl shadow-neon-white transition-all";
                 speak("Paused");
             } else {
                 pauseBtn.innerText = "Pause";
-                pauseBtn.className = "flex-1 py-4 border-2 border-white text-white font-bold text-xl uppercase rounded-xl active:bg-white active:text-black transition-colors";
-                // Don't speak resume, just let timer handle audio cues
+                pauseBtn.className = "flex-1 py-4 glass-panel text-white font-bold text-lg tracking-widest uppercase rounded-2xl active:bg-white/20 transition-all";
             }
         }
 
         function tick() {
             if (isPaused) return;
-
             timeRemaining--;
 
             // Audio Cues
@@ -413,16 +521,18 @@
             if (timeRemaining === 2) { speak("Two"); beep('short'); }
             if (timeRemaining === 1) { speak("One"); beep('short'); }
             
-            // Halfway cues for longer protocols
+            // Specific interval warnings
             if (currentPhase === 'work' && currentProtocol.id === '4x4' && timeRemaining === 120) {
                 speak("Two minutes down, two to go.");
             }
             if (currentPhase === 'rest' && currentProtocol.id === '4x4' && timeRemaining === 60) {
                 speak("One minute of recovery left.");
             }
-            // Cues for RSA
             if (currentPhase === 'rest' && currentProtocol.id === 'rsa' && timeRemaining === 10) {
                 speak("Ten seconds.");
+            }
+            if (currentPhase === 'setRest' && timeRemaining === 15) {
+                speak("15 seconds until next set.");
             }
 
             // Phase Transitions
@@ -432,29 +542,57 @@
                 if (currentPhase === 'prep') {
                     currentPhase = 'work';
                     timeRemaining = currentProtocol.workTime;
+                    phaseTotalTime = currentProtocol.workTime;
                     speak(currentProtocol.id === 'rsa' ? "Sprint!" : "Work");
                 } 
                 else if (currentPhase === 'work') {
                     currentPhase = 'rest';
                     timeRemaining = currentProtocol.restTime;
-                    speak("Rest and recover.");
+                    phaseTotalTime = currentProtocol.restTime;
+                    speak("Active recovery.");
                 } 
                 else if (currentPhase === 'rest') {
-                    if (currentRound >= currentProtocol.rounds) {
-                        // Workout Complete
-                        clearInterval(timerInterval);
-                        speak("Workout complete. Well done.");
-                        phaseDisplay.innerText = "Done";
-                        timeDisplay.innerText = "00:00";
-                        bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans";
-                        setTimeout(stopWorkout, 4000);
-                        return;
+                    if (currentRound >= currentProtocol.reps) {
+                        // Finished all reps in the current set
+                        if (currentSet >= currentProtocol.sets) {
+                            // Entire Workout Complete
+                            clearInterval(timerInterval);
+                            speak("Workout complete. Well done.");
+                            phaseDisplay.innerText = "Done";
+                            timeDisplay.innerText = "00:00";
+                            progressBar.style.width = '0%';
+                            bodyEl.className = "bg-rest min-h-screen flex flex-col font-sans antialiased selection:bg-newman-red";
+                            setTimeout(stopWorkout, 4000);
+                            return;
+                        } else {
+                            // Move to Inter-Set Rest
+                            currentPhase = 'setRest';
+                            timeRemaining = currentProtocol.setRestTime;
+                            phaseTotalTime = currentProtocol.setRestTime;
+                            
+                            let nextSetText = `Set complete. Three minute recovery.`;
+                            if (currentProtocol.id === 'rsa' && currentSet === 3) {
+                                nextSetText += ` Note: Set 4 is an optional finisher. End workout if readiness is low.`;
+                            }
+                            speak(nextSetText);
+                        }
                     } else {
+                        // Next Rep
                         currentRound++;
                         currentPhase = 'work';
                         timeRemaining = currentProtocol.workTime;
+                        phaseTotalTime = currentProtocol.workTime;
                         speak(currentProtocol.id === 'rsa' ? "Sprint!" : "Work");
                     }
+                }
+                else if (currentPhase === 'setRest') {
+                    // Start next set
+                    currentSet++;
+                    currentRound = 1;
+                    currentPhase = 'prep';
+                    timeRemaining = 10;
+                    phaseTotalTime = 10;
+                    speak(`Get ready for Set ${currentSet}. ${currentProtocol.getPhaseName(currentSet)}. 10 seconds.`);
                 }
             }
 
